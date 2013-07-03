@@ -40,6 +40,7 @@ from invenio.urlutils import wash_url_argument
 from invenio.messages import wash_language, gettext_set_language
 from invenio.dateutils import convert_datestruct_to_datetext
 from invenio.dbquery import run_sql
+from socket import gethostname
 
 
 ## Regular expression to match possible password related variable that should
@@ -126,8 +127,10 @@ def register_emergency(msg, recipients=None):
         recipients = get_emergency_recipients()
     recipients = set(recipients)
     recipients.add(CFG_SITE_ADMIN_EMAIL)
+    # Format: Emergency notification on enterprise at http://localhost
+    subject = "Emergency notification on " + gethostname() + " at " + CFG_SITE_URL
     for address_str in recipients:
-        send_email(CFG_SITE_SUPPORT_EMAIL, address_str, "Emergency notification", msg)
+        send_email(CFG_SITE_SUPPORT_EMAIL, address_str, subject, msg)
 
 def get_emergency_recipients(recipient_cfg=CFG_SITE_EMERGENCY_EMAIL_ADDRESSES):
     """Parse a list of appropriate emergency email recipients from
