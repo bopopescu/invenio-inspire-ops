@@ -37,7 +37,7 @@ from invenio.refextract_tag import identify_ibids, \
 from invenio.refextract_tag import identify_ibids, tag_arxiv
 from invenio import refextract_re
 from invenio.refextract_find import get_reference_section_beginning
-from invenio.refextract_api import search_from_reference
+from invenio.refextract_api import search_from_reference, extract_journal_reference
 from invenio.refextract_text import rebuild_reference_lines
 
 
@@ -124,6 +124,19 @@ class FindNumerationTest(unittest.TestCase):
         self.assertEqual(r['volume'], u"24")
         self.assertEqual(r['year'], u"1930")
         self.assertEqual(r['page'], u"418")
+
+    def test_journal_extract(self):
+        r = extract_journal_reference("Science Vol. 338 no. 6108 (2012) pp. 773-775")
+        # Test field identifiers
+        self.assertEqual(r[0][0], u'y')
+        self.assertEqual(r[1][0], u'v')
+        self.assertEqual(r[2][0], u'c')
+        self.assertEqual(r[3][0], u'p')
+        # Test values
+        self.assertEqual(r[0][1], u'2012')
+        self.assertEqual(r[1][1], u'338')
+        self.assertEqual(r[2][1], u'773-775')
+        self.assertEqual(r[3][1], u'Science')
 
 
 class FindSectionTest(unittest.TestCase):

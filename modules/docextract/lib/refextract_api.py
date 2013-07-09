@@ -25,30 +25,36 @@ present here can be considered private by the invenio modules.
 
 
 import os
+import sys
 
 from urllib import urlretrieve
 from tempfile import mkstemp
 
-from invenio.refextract_engine import parse_references, \
-                                      get_plaintext_document_body, \
-                                      parse_reference_line, \
-                                      get_kbs
+from invenio.refextract_engine import (parse_references,
+                                       get_plaintext_document_body,
+                                       parse_reference_line,
+                                       get_kbs,
+                                       parse_tagged_reference_line)
 from invenio.refextract_text import extract_references_from_fulltext
 from invenio.search_engine_utils import get_fieldvalues
-from invenio.bibindex_tokenizers.BibIndexJournalTokenizer import \
-    CFG_JOURNAL_PUBINFO_STANDARD_FORM, \
-    CFG_JOURNAL_TAG
+from invenio.bibindex_tokenizers.BibIndexJournalTokenizer import (
+    CFG_JOURNAL_PUBINFO_STANDARD_FORM, CFG_JOURNAL_TAG)
 from invenio.bibdocfile import BibRecDocs, InvenioBibDocFileError
 from invenio.search_engine import get_record
 from invenio.bibtask import task_low_level_submission
-from invenio.bibrecord import record_delete_fields, record_xml_output, \
-    create_record, record_get_field_instances, record_add_fields, \
-    record_has_field
-from invenio.refextract_find import get_reference_section_beginning, \
-                                    find_numeration_in_body
+from invenio.bibrecord import (record_delete_fields,
+                               record_xml_output,
+                               create_record,
+                               record_get_field_instances,
+                               record_add_fields,
+                               record_has_field)
+from invenio.refextract_find import (get_reference_section_beginning,
+                                     find_numeration_in_body)
 from invenio.refextract_text import rebuild_reference_lines
 from invenio.refextract_config import CFG_REFEXTRACT_FILENAME
 from invenio.config import CFG_TMPSHAREDDIR
+from invenio.refextract_tag import tag_reference_line
+                                
 
 
 class FullTextNotAvailable(Exception):
@@ -171,6 +177,41 @@ def extract_references_from_record_xml(recid):
     """
     return extract_references_from_record(recid).to_xml()
 
+
+def extract_journal_reference(line):
+    """Extracts the journal reference from
+    MARC field 773 and parses for specific
+    journal information.
+
+    Parameter: line - field 773__x, the raw journal ref
+    Return: list of tuples with data values"""
+    tagged_line = tag_reference_line(line, get_kbs(), {})[0]
+    if tagged_line is None:
+        return None
+
+    try:
+       extract = parse_tagged_reference_line('', tagged_line, None, None)[0][0]
+    except IndexError:
+        return None
+
+    if extract is None:
+        return None
+    else:
+        values = []
+        if 'year' in extract:
+            values.append(('y', extract['year']))
+        if 'volume' in extract:
+            values.append(('v', extract['volume']))
+        if 'page' in extract:
+            values.append(('c', extract['page']))
+        if 'title' in extract:
+            values.append(('p', extract['title']))
+
+        if not values:
+            print >> sys.stderr, "RefExtract Warning: Could not identify journal reference values for " + line
+        else:
+            return values
+    return None
 
 def replace_references(recid):
     """Replace references for a record
