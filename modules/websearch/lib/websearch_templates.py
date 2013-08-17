@@ -3843,17 +3843,34 @@ class Template:
     def tmpl_record_hepdata(self, data, recid, isLong=True):
         """ Generate a page for HepData records
         """
+        from invenio import hepdatautils
+        from invenio.search_engine import get_fieldvalues
+
         c = []
 
-        c.append("<div style=\"background-color: #ecece0;\">")
         c.append("<div style=\"background-color: #ececec;\">")
-        c.append("<h3>This data comes from the <a href=\"%s\">Durham HepData project</a></h3>" % ("http://hepdata.cedar.ac.uk/view/ins%s" % (str(recid), ), ));
-        c.append("<h3>Summary:</h3>")
-        c.append("""<div class="hepdataSummary">%s</div>""" % (data.comment, ))
+        c.append("<h3> This data comes from ")
+
+        flag_hepdata = 0
+        flag_dataverse = 0
+        for dataset in data.datasets:
+            publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            if publisher == "HEPDATA" and flag_hepdata == 0:
+                c.append('<a href="http://hepdata.cedar.ac.uk/" target="_blank"> Durham HepData project </a>')
+                flag_hepdata = 1
+            elif publisher == "Dataverse" and flag_dataverse == 0:
+                c.append('<a href="http://thedata.harvard.edu/"> Dataverse </a>')
+                flag_dataverse = 1
+        c.append('</h3>')
+
+        c.append("<div style=\"background-color: #ececec;\">")
+        if data.comment:
+            c.append("<h3> Summary:</h3>")
+            c.append("""<div class="hepdataSummary">%s</div>""" % (data.comment, ))
 
         if data.systematics and data.systematics.strip() != "":
             c.append("<h3>Systematic data: </h3>")
-            c.append(data.systematics)
+            c.append(data.systematics) 
             c.append("</div>")
 
         if data.additional_data_links:
@@ -3862,11 +3879,18 @@ class Template:
                 if "href" in link and "description" in link:
                     c.append("<a href=\"%s/%s\">%s</a><br>" % (CFG_HEPDATA_URL, link["href"], link["description"]))
 
+        c.append("<h3> Datasets:</h3>")
+
         seq = 0
 
         for dataset in data.datasets:
             seq += 1
-            c.append(hepdatadisplayutils.render_hepdata_dataset_html(dataset, recid, seq))
+            publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            if publisher == "HEPDATA":
+                c.append(hepdatadisplayutils.render_hepdata_dataset_html(dataset, recid, seq))
+            else:
+                c.append(hepdatadisplayutils.render_dataverse_dataset_html(dataset.recid))
+
 
         c.append("</div>")
 

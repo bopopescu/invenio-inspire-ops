@@ -1946,7 +1946,6 @@ def hepdata_harvest_task_core():
     if correct_fname:
         correct_tasknum = task_low_level_submission("bibupload",
                                                     "admin", "-c",
-
                                                     correct_fname)
 
     if correct_fname or insert_fname:

@@ -3400,7 +3400,7 @@ def get_detailed_page_tabs(colID=None, recID=None, ln=CFG_SITE_LANG):
             'files'     : {'label': _('Files'),            'visible': False, 'enabled': True, 'order': 7},
             'plots'     : {'label': _('Plots'),            'visible': False, 'enabled': True, 'order': 8},
             'holdings'  : {'label': _('Holdings'),         'visible': False, 'enabled': True, 'order': 9},
-            'hepdata'  : {'label': _('HepData'),         'visible': False, 'enabled': True, 'order': 12}
+            'hepdata'   : {'label': _('HepData'),         'visible': False, 'enabled': True, 'order': 12}
             }
 
     res = run_sql("SELECT tabs FROM collectiondetailedrecordpagetabs " + \
