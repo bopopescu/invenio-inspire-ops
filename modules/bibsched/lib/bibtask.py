@@ -949,6 +949,27 @@ status: %s
     log_file = os.path.join(CFG_BIBSCHED_LOGDIR, 'bibsched_task_%d.log' % _TASK_PARAMS['task_id'])
     return send_email(CFG_SITE_SUPPORT_EMAIL, email_logs_to, title, body, attachments=[(log_file, 'text/plain'), (err_file, 'text/plain')])
 
+
+def get_task_old_runtime(task_params):
+    """Fetch from the database the last time this task ran
+
+    Here we check if the task can shift away or has to be run at a fixed time.
+    """
+    if task_params['fixed_time'] or \
+                        task_params['task_name'] in CFG_BIBTASK_FIXEDTIMETASKS:
+        sql = "SELECT runtime FROM schTASK WHERE id=%s"
+        old_runtime = run_sql(sql, (task_params['task_id'], ))[0][0]
+    else:
+        old_runtime = None
+    return old_runtime
+
+
+def get_task_new_runtime(task_params):
+    """Compute the next time this task should run"""
+    return get_datetime(task_params['sleeptime'],
+                        now=get_task_old_runtime(task_params))
+
+
 def _task_run(task_run_fnc):
     """Runs the task by fetching arguments from the BibSched task queue.
     This is what BibSched will be invoking via daemon call.
@@ -982,7 +1003,9 @@ def _task_run(task_run_fnc):
     time_now = datetime.datetime.now()
     if _TASK_PARAMS['runtime_limit'] is not None:
         if not _TASK_PARAMS['runtime_limit'][0][0] <= time_now <= _TASK_PARAMS['runtime_limit'][0][1]:
-            if time_now <= _TASK_PARAMS['runtime_limit'][0][0]:
+            if task_get_option('fixed_time'):
+                new_runtime = get_task_new_runtime(_TASK_PARAMS)
+            elif time_now <= _TASK_PARAMS['runtime_limit'][0][0]:
                 new_runtime = _TASK_PARAMS['runtime_limit'][0][0].strftime("%Y-%m-%d %H:%M:%S")
             else:
                 new_runtime = _TASK_PARAMS['runtime_limit'][1][0].strftime("%Y-%m-%d %H:%M:%S")
@@ -1041,13 +1064,7 @@ def _task_run(task_run_fnc):
             argv = task_get_options(_TASK_PARAMS['task_id'], _TASK_PARAMS['task_name'])
             verbose_argv = 'Will execute: %s' % ' '.join([escape_shell_arg(str(arg)) for arg in argv])
 
-            # Here we check if the task can shift away of has to be run at
-            # a fixed time
-            if task_get_task_param('fixed_time') or _TASK_PARAMS['task_name'] in CFG_BIBTASK_FIXEDTIMETASKS:
-                old_runtime = run_sql("SELECT runtime FROM schTASK WHERE id=%s", (_TASK_PARAMS['task_id'], ))[0][0]
-            else:
-                old_runtime = None
-            new_runtime = get_datetime(sleeptime, now=old_runtime)
+            new_runtime = get_task_new_runtime(_TASK_PARAMS)
 
             ## The task is a daemon. We resubmit it
             if task_status == 'DONE':
