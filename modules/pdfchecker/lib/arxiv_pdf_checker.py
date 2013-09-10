@@ -249,7 +249,7 @@ def download_external_url(url, download_to_file, content_type=None,
             retry_attempt += 1
         except (urllib2.URLError, socket.timeout, socket.gaierror, socket.error), e:
             error_str = str(e)
-            write_message("socket error, retrying after %ss" % retry_after)
+            write_message("socket error, retrying after %ss" % timeout)
             time.sleep(timeout)
             retry_attempt += 1
         else:

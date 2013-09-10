@@ -75,9 +75,8 @@ class TestTask(unittest.TestCase):
         bibtask.setup_loggers()
         bibtask.task_set_task_param('verbose', 0)
         recs = bibupload.xml_marc_to_records(self.bibupload_xml)
-        while get_fieldvalues(recid, '037__a'):
-            bibupload.bibupload(recs[0], opt_mode='delete')
-        bibupload.bibupload(recs[0], opt_mode='append')
+        status, dummy, err = bibupload.bibupload(recs[0], opt_mode='correct')
+        assert status == 0, err.strip()
         assert len(get_fieldvalues(recid, '037__a')) == 1
 
         def mocked_oai_harvest_get(prefix, baseurl, harvestpath,
