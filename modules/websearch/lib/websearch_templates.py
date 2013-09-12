@@ -3856,7 +3856,7 @@ class Template:
         for dataset in data.datasets:
             publisher = get_fieldvalues(dataset.recid, '520__9')[0]
             if publisher == "HEPDATA" and flag_hepdata == 0:
-                c.append('<a href="http://hepdata.cedar.ac.uk/" target="_blank"> Durham HepData project </a>')
+                c.append('<a href="http://hepdata.cedar.ac.uk/view/ins%s" target="_blank"> Durham HepData project </a>' % (recid))
                 flag_hepdata = 1
             elif publisher == "Dataverse" and flag_dataverse == 0:
                 c.append('<a href="http://thedata.harvard.edu/"> Dataverse </a>')
@@ -3870,7 +3870,7 @@ class Template:
 
         if data.systematics and data.systematics.strip() != "":
             c.append("<h3>Systematic data: </h3>")
-            c.append(data.systematics) 
+            c.append(data.systematics)
             c.append("</div>")
 
         if data.additional_data_links:
