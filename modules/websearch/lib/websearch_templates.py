@@ -3856,7 +3856,13 @@ class Template:
         for dataset in data.datasets:
             publisher = get_fieldvalues(dataset.recid, '520__9')[0]
             if publisher == "HEPDATA" and flag_hepdata == 0:
-                c.append('<a href="http://hepdata.cedar.ac.uk/view/ins%s" target="_blank"> Durham HepData project </a>' % (recid))
+                if int(recid) == 1241574:
+                    ## HACK: this is still not linked. To be removed after it's no longer a temporary entry and
+                    ## Mike comes back from holiday :-)
+                    ## Measurements of Higgs boson production and couplings in diboson final states with the ATLAS detector at the LHC
+                    c.append('<a href="http://hepdata.cedar.ac.uk/" target="_blank"> Durham HepData project </a>')
+                else:
+                    c.append('<a href="http://hepdata.cedar.ac.uk/view/ins%s" target="_blank"> Durham HepData project </a>' % (recid))
                 flag_hepdata = 1
             elif publisher == "Dataverse" and flag_dataverse == 0:
                 c.append('<a href="http://thedata.harvard.edu/"> Dataverse </a>')
