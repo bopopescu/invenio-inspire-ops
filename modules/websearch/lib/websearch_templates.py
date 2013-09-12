@@ -3854,7 +3854,10 @@ class Template:
         flag_hepdata = 0
         flag_dataverse = 0
         for dataset in data.datasets:
-            publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            try:
+                publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            except IndexError:
+                continue
             if publisher == "HEPDATA" and flag_hepdata == 0:
                 if int(recid) == 1241574:
                     ## HACK: this is still not linked. To be removed after it's no longer a temporary entry and
@@ -3891,7 +3894,10 @@ class Template:
 
         for dataset in data.datasets:
             seq += 1
-            publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            try:
+                publisher = get_fieldvalues(dataset.recid, '520__9')[0]
+            except IndexError:
+                continue
             if publisher == "HEPDATA":
                 c.append(hepdatadisplayutils.render_hepdata_dataset_html(dataset, recid, seq))
             else:
