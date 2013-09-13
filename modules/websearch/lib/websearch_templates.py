@@ -85,6 +85,7 @@ from invenio.search_engine_utils import get_fieldvalues
 from invenio.bibformat import format_record
 
 from invenio import hepdatadisplayutils
+
 _RE_PUNCTUATION = re.compile(CFG_BIBINDEX_CHARS_PUNCTUATION)
 _RE_SPACES = re.compile(r"\s+")
 
@@ -3857,6 +3858,7 @@ class Template:
             try:
                 publisher = get_fieldvalues(dataset.recid, '520__9')[0]
             except IndexError:
+                hepdatadisplayutils.create_hepdata_ticket(dataset.recid, 'Data missing in 520__9')
                 continue
             if publisher == "HEPDATA" and flag_hepdata == 0:
                 if int(recid) == 1241574:
@@ -3897,6 +3899,7 @@ class Template:
             try:
                 publisher = get_fieldvalues(dataset.recid, '520__9')[0]
             except IndexError:
+                hepdatadisplayutils.create_hepdata_ticket(dataset.recid, 'Data missing in 520__9')
                 continue
             if publisher == "HEPDATA":
                 c.append(hepdatadisplayutils.render_hepdata_dataset_html(dataset, recid, seq))

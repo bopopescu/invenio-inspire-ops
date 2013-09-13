@@ -29,9 +29,16 @@ import Queue
 import threading
 import signal
 
-from invenio.config import CFG_CACHEDIR, CFG_HEPDATA_URL, \
-    CFG_HEPDATA_PLOTSIZE, CFG_LOGDIR, CFG_TMPSHAREDDIR, CFG_HEPDATA_THREADS_NUM, \
-    CFG_HEPDATA_INDEX, CFG_HEPDATA_FIELD
+from invenio.config import (CFG_CACHEDIR,
+                            CFG_HEPDATA_URL,
+                            CFG_HEPDATA_PLOTSIZE,
+                            CFG_LOGDIR,
+                            CFG_TMPSHAREDDIR,
+                            CFG_HEPDATA_THREADS_NUM,
+                            CFG_HEPDATA_INDEX,
+                            CFG_HEPDATA_FIELD,
+                            CFG_SITE_RECORD,
+                            CFG_SITE_SECURE_URL)
 from invenio.jsonutils import json
 from datetime import datetime
 import time
@@ -1968,8 +1975,31 @@ def hepdata_harvest_task_core():
     return True
 
 
+def create_hepdata_ticket(recid, msg, queue="Data_Exceptions"):
+    """
+    Creates a ticket when something goes wrong in rendering HepData
+    records.
+    """
+    from invenio.bibcatalog_task import BibCatalogTicket
+    subject = "Problem in data record %s: %s" % (str(recid),
+                                                 msg[:30])
+    body = """
+    There is a problem in record: %(siteurl)s/%(record)s/%(recid)s
+
+    %(msg)s
+    """ % {
+        'siteurl': CFG_SITE_SECURE_URL,
+        'record': CFG_SITE_RECORD,
+        'recid': recid,
+        'msg': msg
+    }
+    ticket = BibCatalogTicket(subject=subject,
+                              body=body,
+                              queue=queue,
+                              recid=recid)
+    ticket.submit()
+
 if __name__ == "__main__":
     paper = download_paper("http://hepdata.cedar.ac.uk/view/ins1094568")
     #    for dataset in paper.datasets:
     print "MARCXML : " + paper.datasets[0].get_marcxml()
-

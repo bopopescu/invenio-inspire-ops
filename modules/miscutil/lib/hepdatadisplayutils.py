@@ -21,7 +21,11 @@
 
 #symbols replacement dictionary
 
-from invenio.config import CFG_HEPDATA_URL, CFG_HEPDATA_PLOTSIZE, CFG_LOGDIR, CFG_SITE_URL
+from invenio.config import (CFG_HEPDATA_URL,
+                            CFG_HEPDATA_PLOTSIZE,
+                            CFG_LOGDIR,
+                            CFG_SITE_URL)
+
 import re
 import urllib2
 import os
@@ -645,7 +649,6 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link = True):
     c.append("<b>Description: </b> " + dataset.comments + "<br />")
     c.append("<br />")
 
-    
     publisher = get_fieldvalues(dataset.recid, '520__9')
 
     link_txt = "Go to the record"
@@ -661,26 +664,29 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link = True):
         c.append("<table cellpadding=\"0\" cellspacing=\"0\" class=\"hepdataTable\">")
 
         # rendering files links
-        plain_file_url = get_fieldvalues(dataset.recid, '8564_u')[0]
-        c.append("<tr><td colspan=\"%(colspan)s\" style=\"text-align: left;\"> <a href=\"%(plain_file_url)s\"> <img src=\"%(site_url)s/img/file-icon-text-15x20.gif\"></img><br> Plain</td>" % {
-            "site_url" : CFG_SITE_URL,
-            "plain_file_url" : plain_file_url,
-            "colspan" : str(dataset.num_columns)
-            })
+        plain_file_url = get_fieldvalues(dataset.recid, '8564_u')
+        if plain_file_url:
+            c.append("<tr><td colspan=\"%(colspan)s\" style=\"text-align: left;\"> <a href=\"%(plain_file_url)s\"> <img src=\"%(site_url)s/img/file-icon-text-15x20.gif\"></img><br> Plain</td>" % {
+                "site_url" : CFG_SITE_URL,
+                "plain_file_url" : plain_file_url,
+                "colspan" : str(dataset.num_columns)
+                })
 
-        c.append("""<td rowspan="%(rowspan)i" class="expanderTableCell masterPlotExpanderTableCell">""" \
-                     % {"rowspan" :  len(dataset.data_qualifiers) + 3})
-        if multiplot_url:
-            c.append("""<p class="expander masterPlotExpander" onclick="%(onclick_code_masterplot_expand)s" id="%(masterplot_expander_id)s"><a>%(expand_message_masterplot)s</a></p>""" \
-            	         % args)
-        c.append("</td>")
-        c.append("<td class=\"masterplot_cell\" rowspan=\"%(masterplot_rowspan)s\"><div class=\"%(masterplot_layer_class)s\" style=\"display:none;\">" % args)
-        if multiplot_url:
-            c.append("<div><img src=\"%(multiplot_url)s\" alt=\"The plot is not available\" class=\"hepdataimg\"></img></div>" % args)
+            c.append("""<td rowspan="%(rowspan)i" class="expanderTableCell masterPlotExpanderTableCell">""" \
+                         % {"rowspan" :  len(dataset.data_qualifiers) + 3})
+            if multiplot_url:
+                c.append("""<p class="expander masterPlotExpander" onclick="%(onclick_code_masterplot_expand)s" id="%(masterplot_expander_id)s"><a>%(expand_message_masterplot)s</a></p>""" \
+                             % args)
+            c.append("</td>")
+            c.append("<td class=\"masterplot_cell\" rowspan=\"%(masterplot_rowspan)s\"><div class=\"%(masterplot_layer_class)s\" style=\"display:none;\">" % args)
+            if multiplot_url:
+                c.append("<div><img src=\"%(multiplot_url)s\" alt=\"The plot is not available\" class=\"hepdataimg\"></img></div>" % args)
 
-        c.append("</div></td>" % args)
-        c.append("</tr>")
-
+            c.append("</div></td>" % args)
+            c.append("</tr>")
+        else:
+            from invenio.hepdatautils import create_hepdata_ticket
+            create_hepdata_ticket(dataset.recid, 'Data missing in 8564_u')
 
         # rendering column titles
         c.append("<tr>")
@@ -788,9 +794,7 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link = True):
         c.append("</tr>")
         c.append("</table>")
         c.append("</div>")
-        
     c.append("</div>")
-    
 
     return "\n".join(c)
 
@@ -814,7 +818,7 @@ def render_dataverse_dataset_html(recid, display_link = True):
     c.append("<br />")
     c.append("<b>Description: </b> " + comments + "<br />")
     c.append("<br />")
-    
+
     link_txt = "Go to the record"
     if display_link:
         c.append("<a href=\"%s/record/%s\">%s</a>" % (CFG_SITE_URL, str(recid), link_txt))
