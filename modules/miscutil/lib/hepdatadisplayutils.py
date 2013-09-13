@@ -668,7 +668,7 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link = True):
         if plain_file_url:
             c.append("<tr><td colspan=\"%(colspan)s\" style=\"text-align: left;\"> <a href=\"%(plain_file_url)s\"> <img src=\"%(site_url)s/img/file-icon-text-15x20.gif\"></img><br> Plain</td>" % {
                 "site_url" : CFG_SITE_URL,
-                "plain_file_url" : plain_file_url,
+                "plain_file_url" : plain_file_url[0],
                 "colspan" : str(dataset.num_columns)
                 })
 
