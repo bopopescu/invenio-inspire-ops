@@ -800,7 +800,6 @@ def parse_tagged_reference_line(line_marker,
                                                    'volume'     : reference_volume,
                                                    'year'       : reference_year,
                                                    'page'       : reference_page,
-#                                                   'page_end'   : reference_page_end,
                                                    'is_ibid'    : is_ibid,
                                                    'extra_ibids': []
                                                   }
@@ -832,7 +831,6 @@ def parse_tagged_reference_line(line_marker,
                                                  'volume'     : reference_volume,
                                                  'year'       : reference_year,
                                                  'page'       : reference_page,
-#                                                 'page_end'   : reference_page_end
                                                 })
                         # Increment the stats counters:
                         count_title += 1

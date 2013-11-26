@@ -127,16 +127,10 @@ class FindNumerationTest(unittest.TestCase):
 
     def test_journal_extract(self):
         r = extract_journal_reference("Science Vol. 338 no. 6108 (2012) pp. 773-775")
-        # Test field identifiers
-        self.assertEqual(r[0][0], u'y')
-        self.assertEqual(r[1][0], u'v')
-        self.assertEqual(r[2][0], u'c')
-        self.assertEqual(r[3][0], u'p')
-        # Test values
-        self.assertEqual(r[0][1], u'2012')
-        self.assertEqual(r[1][1], u'338')
-        self.assertEqual(r[2][1], u'773-775')
-        self.assertEqual(r[3][1], u'Science')
+        self.assertEqual(r['year'], u'2012')
+        self.assertEqual(r['volume'], u'338')
+        self.assertEqual(r['page'], u'773-775')
+        self.assertEqual(r['title'], u'Science')
 
 
 class FindSectionTest(unittest.TestCase):

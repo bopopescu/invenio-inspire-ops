@@ -189,29 +189,12 @@ def extract_journal_reference(line):
     if tagged_line is None:
         return None
 
-    try:
-       extract = parse_tagged_reference_line('', tagged_line, None, None)[0][0]
-    except IndexError:
-        return None
+    elements, dummy_marker, dummy_stats = parse_tagged_reference_line('', tagged_line, [], [])
 
-    if extract is None:
-        return None
-    else:
-        values = []
-        if 'year' in extract:
-            values.append(('y', extract['year']))
-        if 'volume' in extract:
-            values.append(('v', extract['volume']))
-        if 'page' in extract:
-            values.append(('c', extract['page']))
-        if 'title' in extract:
-            values.append(('p', extract['title']))
+    for element in elements:
+        if element['type'] == 'JOURNAL':
+            return element
 
-        if not values:
-            print >> sys.stderr, "RefExtract Warning: Could not identify journal reference values for " + line
-        else:
-            return values
-    return None
 
 def replace_references(recid):
     """Replace references for a record

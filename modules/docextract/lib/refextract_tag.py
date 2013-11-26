@@ -561,7 +561,7 @@ def create_numeration_tag(info):
     numeration_tags = u' <cds.VOL>%s</cds.VOL>' % series_and_volume
     if info.get('year', False):
         numeration_tags += u' <cds.YR>(%(year)s)</cds.YR>' % info
-    if 'page_end' in info:
+    if info.get('page_end', False):
         numeration_tags += u' <cds.PG>%(page)s-%(page_end)s</cds.PG>' % info
     else:
         numeration_tags += u' <cds.PG>%(page)s</cds.PG>' % info
