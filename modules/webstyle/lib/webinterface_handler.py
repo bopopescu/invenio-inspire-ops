@@ -386,7 +386,7 @@ def create_handler(root):
                 else:
                     setUid(req=req, uid=uid)
 
-        guest_p = isGuestUser(getUid(req), run_on_slave=False)
+        guest_p = isGuestUser(getUid(req), run_on_subordinate=False)
 
         uri = req.uri
         if uri == '/':

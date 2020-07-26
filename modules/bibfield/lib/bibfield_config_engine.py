@@ -129,8 +129,8 @@ def _create_config_parser():
                   .setResultsName("parse_first")
     do_not_cache = (Suppress("@") + "do_not_cache")\
                    .setResultsName("do_not_cache")
-    master_format = (Suppress("@master_format") + originalTextFor(nestedExpr("(", ")")))\
-                    .setResultsName("master_format")
+    main_format = (Suppress("@main_format") + originalTextFor(nestedExpr("(", ")")))\
+                    .setResultsName("main_format")
 
     derived_calculated_body = Optional(parse_first) + Optional(depends_on) + Optional(only_if) + Optional(do_not_cache) + python_allowed_expr
 
@@ -146,7 +146,7 @@ def _create_config_parser():
                                             .setResultsName("creator_def", listAllMatches=True)
     creator = "creator" + Suppress(":") + INDENT + OneOrMore(creator_body) + UNDENT
 
-    checker_function = (Optional(master_format) + ZeroOrMore(ident + ".") + ident + originalTextFor(nestedExpr('(', ')')))\
+    checker_function = (Optional(main_format) + ZeroOrMore(ident + ".") + ident + originalTextFor(nestedExpr('(', ')')))\
                        .setResultsName("checker_function", listAllMatches=True)
     checker = ("checker" + Suppress(":") + INDENT + OneOrMore(checker_function) + UNDENT)
 
@@ -436,17 +436,17 @@ class BibFieldParser(object):
             if self.config_rules[json_id]['overwrite']:
                 self.config_rules[json_id]['checker'] = []
             for checker in rule.checker_function:
-                if checker.master_format:
-                    master_format = eval(rule.master_format[0])
+                if checker.main_format:
+                    main_format = eval(rule.main_format[0])
                     checker_function_name = checker[1]
                     arguments = checker[2][1:-1]
                 else:
-                    master_format = ('all',)
+                    main_format = ('all',)
                     checker_function_name = checker[0]
                     arguments = checker[1][1:-1]
 
-                #json_id : (master_format, checker_name, parameters)
-                self.config_rules[json_id]['checker'].append((master_format,
+                #json_id : (main_format, checker_name, parameters)
+                self.config_rules[json_id]['checker'].append((main_format,
                                                               checker_function_name,
                                                               arguments))
 

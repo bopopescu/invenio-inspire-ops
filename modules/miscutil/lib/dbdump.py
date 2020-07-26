@@ -32,7 +32,7 @@ from invenio.dbquery import CFG_DATABASE_HOST, \
                             CFG_DATABASE_NAME, \
                             CFG_DATABASE_PORT, \
                             CFG_DATABASE_SLAVE, \
-                            get_connection_for_dump_on_slave, \
+                            get_connection_for_dump_on_subordinate, \
                             run_sql
 from invenio.bibtask import task_init, \
                             write_message, \
@@ -66,55 +66,55 @@ def _delete_old_dumps(dirname, filename, number_to_keep):
         write_message("... deleting %s" % dirname + os.sep + afile)
         os.remove(dirname + os.sep + afile)
 
-def check_slave_is_up(connection=None):
-    """Raise an StandardError in case the slave is not correctly up."""
+def check_subordinate_is_up(connection=None):
+    """Raise an StandardError in case the subordinate is not correctly up."""
     if connection is None:
-        connection = get_connection_for_dump_on_slave()
+        connection = get_connection_for_dump_on_subordinate()
     res = run_sql("SHOW SLAVE STATUS", with_dict=True, connection=connection)
-    if res[0]['Slave_IO_Running'] != 'Yes':
-        raise StandardError("Slave_IO_Running is not set to 'Yes'")
-    if res[0]['Slave_SQL_Running'] != 'Yes':
-        raise StandardError("Slave_SQL_Running is not set to 'Yes'")
+    if res[0]['Subordinate_IO_Running'] != 'Yes':
+        raise StandardError("Subordinate_IO_Running is not set to 'Yes'")
+    if res[0]['Subordinate_SQL_Running'] != 'Yes':
+        raise StandardError("Subordinate_SQL_Running is not set to 'Yes'")
 
-def check_slave_is_down(connection=None):
-    """Raise an StandardError in case the slave is not correctly down."""
+def check_subordinate_is_down(connection=None):
+    """Raise an StandardError in case the subordinate is not correctly down."""
     if connection is None:
-        connection = get_connection_for_dump_on_slave()
+        connection = get_connection_for_dump_on_subordinate()
     res = run_sql("SHOW SLAVE STATUS", with_dict=True, connection=connection)
-    if res[0]['Slave_SQL_Running'] != 'No':
-        raise StandardError("Slave_SQL_Running is not set to 'No'")
+    if res[0]['Subordinate_SQL_Running'] != 'No':
+        raise StandardError("Subordinate_SQL_Running is not set to 'No'")
 
-def detach_slave(connection=None):
-    """Detach the slave."""
+def detach_subordinate(connection=None):
+    """Detach the subordinate."""
     if connection is None:
-        connection = get_connection_for_dump_on_slave()
+        connection = get_connection_for_dump_on_subordinate()
     run_sql("STOP SLAVE SQL_THREAD", connection=connection)
-    check_slave_is_down(connection)
+    check_subordinate_is_down(connection)
 
-def attach_slave(connection=None):
-    """Attach the slave."""
+def attach_subordinate(connection=None):
+    """Attach the subordinate."""
     if connection is None:
-        connection = get_connection_for_dump_on_slave()
+        connection = get_connection_for_dump_on_subordinate()
     run_sql("START SLAVE", connection=connection)
-    check_slave_is_up(connection)
+    check_subordinate_is_up(connection)
 
-def check_slave_is_in_consistent_state(connection=None):
+def check_subordinate_is_in_consistent_state(connection=None):
     """
-    Check if the slave is already aware that dbdump task is running.
+    Check if the subordinate is already aware that dbdump task is running.
     dbdump being a monotask, guarantee that no other task is currently
-    running and it's hence safe to detach the slave and start the
+    running and it's hence safe to detach the subordinate and start the
     actual dump.
     """
     if connection is None:
-        connection = get_connection_for_dump_on_slave()
+        connection = get_connection_for_dump_on_subordinate()
     i = 0
     ## Let's take the current status of dbdump (e.g. RUNNING, ABOUT TO STOP, etc.)...
     current_status = run_sql("SELECT status FROM schTASK WHERE id=%s", (task_get_task_param('task_id'), ))[0][0]
     while True:
         if i == 10:
             ## Timeout!!
-            raise StandardError("The slave seems not to pick up with the master")
-        ## ...and let's see if it matches with what the slave sees.
+            raise StandardError("The subordinate seems not to pick up with the main")
+        ## ...and let's see if it matches with what the subordinate sees.
         if run_sql("SELECT status FROM schTASK WHERE id=%s AND status=%s", (task_get_task_param('task_id'), current_status), connection=connection):
             ## Bingo!
             return
@@ -229,15 +229,15 @@ def _dbdump_elaborate_submit_param(key, value, dummyopts, dummyargs):
         if not CFG_PATH_GZIP or (CFG_PATH_GZIP and not os.path.exists(CFG_PATH_GZIP)):
             raise StandardError("ERROR: No valid gzip path is defined.")
         task_set_option('compress', True)
-    elif key in ('-S', '--slave'):
+    elif key in ('-S', '--subordinate'):
         if value:
-            task_set_option('slave', value)
+            task_set_option('subordinate', value)
         else:
             if not CFG_DATABASE_SLAVE:
-                raise StandardError("ERROR: No slave defined.")
-            task_set_option('slave', CFG_DATABASE_SLAVE)
-    elif key in ('--dump-on-slave-helper', ):
-        task_set_option('dump_on_slave_helper_mode', True)
+                raise StandardError("ERROR: No subordinate defined.")
+            task_set_option('subordinate', CFG_DATABASE_SLAVE)
+    elif key in ('--dump-on-subordinate-helper', ):
+        task_set_option('dump_on_subordinate_helper_mode', True)
     elif key in ('--ignore-tables',):
         try:
             re.compile(value)
@@ -261,16 +261,16 @@ def _dbdump_run_task_core():
     port = CFG_DATABASE_PORT
     connection = None
     try:
-        if task_get_option('slave') and not task_get_option('dump_on_slave_helper_mode'):
-            connection = get_connection_for_dump_on_slave()
-            write_message("Dump on slave requested")
-            write_message("... checking if slave is well up...")
-            check_slave_is_up(connection)
-            write_message("... checking if slave is in consistent state...")
-            check_slave_is_in_consistent_state(connection)
-            write_message("... detaching slave database...")
-            detach_slave(connection)
-            write_message("... scheduling dump on slave helper...")
+        if task_get_option('subordinate') and not task_get_option('dump_on_subordinate_helper_mode'):
+            connection = get_connection_for_dump_on_subordinate()
+            write_message("Dump on subordinate requested")
+            write_message("... checking if subordinate is well up...")
+            check_subordinate_is_up(connection)
+            write_message("... checking if subordinate is in consistent state...")
+            check_subordinate_is_in_consistent_state(connection)
+            write_message("... detaching subordinate database...")
+            detach_subordinate(connection)
+            write_message("... scheduling dump on subordinate helper...")
             helper_arguments = []
             if task_get_option("number"):
                 helper_arguments += ["--number", str(task_get_option("number"))]
@@ -282,18 +282,18 @@ def _dbdump_run_task_core():
                 helper_arguments += ["--ignore-tables", str(task_get_option("ignore_tables"))]
             if task_get_option("compress"):
                 helper_arguments += ["--compress"]
-            if task_get_option("slave"):
-                helper_arguments += ["--slave", str(task_get_option("slave"))]
-            helper_arguments += ['-N', 'slavehelper', '--dump-on-slave-helper']
+            if task_get_option("subordinate"):
+                helper_arguments += ["--subordinate", str(task_get_option("subordinate"))]
+            helper_arguments += ['-N', 'subordinatehelper', '--dump-on-subordinate-helper']
             task_id = task_low_level_submission('dbdump', task_get_task_param('user'), '-P4', *helper_arguments)
-            write_message("Slave scheduled with ID %s" % task_id)
+            write_message("Subordinate scheduled with ID %s" % task_id)
             task_update_progress("DONE")
             return True
-        elif task_get_option('dump_on_slave_helper_mode'):
-            write_message("Dumping on slave mode")
-            connection = get_connection_for_dump_on_slave()
-            write_message("... checking if slave is well down...")
-            check_slave_is_down(connection)
+        elif task_get_option('dump_on_subordinate_helper_mode'):
+            write_message("Dumping on subordinate mode")
+            connection = get_connection_for_dump_on_subordinate()
+            write_message("... checking if subordinate is well down...")
+            check_subordinate_is_down(connection)
             host = CFG_DATABASE_SLAVE
 
         task_update_progress("Reading parameters")
@@ -302,7 +302,7 @@ def _dbdump_run_task_core():
         output_num = task_get_option('number', 5)
         params = task_get_option('params', None)
         compress = task_get_option('compress', False)
-        slave = task_get_option('slave', False)
+        subordinate = task_get_option('subordinate', False)
         ignore_tables = task_get_option('ignore_tables', None)
         if ignore_tables:
             ignore_tables = get_table_names(ignore_tables)
@@ -319,8 +319,8 @@ def _dbdump_run_task_core():
         task_update_progress("Dumping database")
         write_message("Database dump started")
 
-        if slave:
-            output_file_prefix = 'slave-%s-dbdump-' % (CFG_DATABASE_NAME,)
+        if subordinate:
+            output_file_prefix = 'subordinate-%s-dbdump-' % (CFG_DATABASE_NAME,)
         else:
             output_file_prefix = '%s-dbdump-' % (CFG_DATABASE_NAME,)
         output_file = output_file_prefix + output_file_suffix
@@ -333,9 +333,9 @@ def _dbdump_run_task_core():
                         ignore_tables=ignore_tables)
         write_message("Database dump ended")
     finally:
-        if connection and task_get_option('dump_on_slave_helper_mode'):
-            write_message("Reattaching slave")
-            attach_slave(connection)
+        if connection and task_get_option('dump_on_subordinate_helper_mode'):
+            write_message("Reattaching subordinate")
+            attach_subordinate(connection)
     # prune old dump files:
     task_update_progress("Pruning old dump files")
     write_message("Pruning old dump files started")
@@ -355,7 +355,7 @@ def main():
   -n, --number=NUM      Keep up to NUM previous dump files. [default=5]
   --params=PARAMS       Specify your own mysqldump parameters. Optional.
   --compress            Compress dump directly into gzip.
-  -S, --slave=HOST      Perform the dump from a slave, if no host use CFG_DATABASE_SLAVE.
+  -S, --subordinate=HOST      Perform the dump from a subordinate, if no host use CFG_DATABASE_SLAVE.
   --ignore-tables=regex Ignore tables matching the given regular expression
 
 Examples:
@@ -363,7 +363,7 @@ Examples:
     $ dbdump -n3 -o/tmp -s1d -L 02:00-04:00
 """ % CFG_LOGDIR,
               specific_params=("n:o:p:S:",
-                               ["number=", "output=", "params=", "slave=", "compress", 'ignore-tables=', "dump-on-slave-helper"]),
+                               ["number=", "output=", "params=", "subordinate=", "compress", 'ignore-tables=', "dump-on-subordinate-helper"]),
               task_submit_elaborate_specific_parameter_fnc=_dbdump_elaborate_submit_param,
               task_run_fnc=_dbdump_run_task_core)
 

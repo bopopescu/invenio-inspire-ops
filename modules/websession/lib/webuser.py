@@ -328,7 +328,7 @@ def get_uid_from_email(email):
         register_exception()
         return -1
 
-def isGuestUser(uid, run_on_slave=True):
+def isGuestUser(uid, run_on_subordinate=True):
     """It Checks if the userId corresponds to a guestUser or not
 
        isGuestUser(uid) -> boolean
@@ -336,7 +336,7 @@ def isGuestUser(uid, run_on_slave=True):
     out = 1
     try:
         res = run_sql("SELECT email FROM user WHERE id=%s LIMIT 1", (uid,), 1,
-                      run_on_slave=run_on_slave)
+                      run_on_subordinate=run_on_subordinate)
         if res:
             if res[0][0]:
                 out = 0
@@ -370,7 +370,7 @@ def isUserSuperAdmin(user_info):
         FROM accROLE r LEFT JOIN user_accROLE ur
         ON r.id = ur.id_accROLE
         WHERE r.name = %s AND
-        ur.id_user = %s AND ur.expiration>=NOW() LIMIT 1""", (SUPERADMINROLE, user_info['uid']), 1, run_on_slave=True):
+        ur.id_user = %s AND ur.expiration>=NOW() LIMIT 1""", (SUPERADMINROLE, user_info['uid']), 1, run_on_subordinate=True):
         return True
     return acc_firerole_check_user(user_info, load_role_definition(acc_get_role_id(SUPERADMINROLE)))
 
@@ -1075,7 +1075,7 @@ def list_users_in_role(role):
                        FROM user_accROLE uacc JOIN accROLE acc
                          ON uacc.id_accROLE=acc.id
                       WHERE acc.name=%s""",
-                  (role,), run_on_slave=True)
+                  (role,), run_on_subordinate=True)
     if res:
         return map(lambda x: int(x[0]), res)
     return []
@@ -1099,7 +1099,7 @@ def list_users_in_roles(role_list):
         for role in role_list[:-1]:
             query_addons += "acc.name=%s OR "
         query_addons += "acc.name=%s"
-    res = run_sql(query + query_addons, query_params, run_on_slave=True)
+    res = run_sql(query + query_addons, query_params, run_on_subordinate=True)
     if res:
         return map(lambda x: int(x[0]), res)
     return []

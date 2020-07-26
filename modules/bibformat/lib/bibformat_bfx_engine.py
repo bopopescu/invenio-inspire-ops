@@ -894,7 +894,7 @@ class MARCTranslator:
     def build_object(self, name):
         '''
         Build the object from the list of addresses
-        A slave function for get_object.
+        A subordinate function for get_object.
         '''
         new_object = {}
         parent_name = self.memory[name]['parent'];

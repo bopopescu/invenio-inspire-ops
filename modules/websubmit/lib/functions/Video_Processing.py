@@ -70,8 +70,8 @@ def Video_Processing(parameters, curdir, form, user_info=None):
         fp = open(file_storing_name)
         filename = fp.read()
         fp.close()
-        batch_template['bibdoc_master_docname'] = os.path.splitext(os.path.split(filename)[1])[0]
-        batch_template['bibdoc_master_extension'] = os.path.splitext(filename)[1]
+        batch_template['bibdoc_main_docname'] = os.path.splitext(os.path.split(filename)[1])[0]
+        batch_template['bibdoc_main_extension'] = os.path.splitext(filename)[1]
         batch_template['submission_filename'] = filename
     except:
         register_exception(prefix="The file containing the original filename of the video was not readable")

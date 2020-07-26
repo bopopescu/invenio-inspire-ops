@@ -432,16 +432,16 @@ def get_preformatted_record(recID, of, decompress=zlib.decompress):
     @param decompress: the method used to decompress the preformatted record in database
     @return: formatted record as String, or None if not exist
     """
-    # Decide whether to use DB slave:
+    # Decide whether to use DB subordinate:
     if of in ('xm', 'recstruct'):
-        run_on_slave = False # for master formats, use DB master
+        run_on_subordinate = False # for main formats, use DB main
     else:
-        run_on_slave = True # for other formats, we can use DB slave
+        run_on_subordinate = True # for other formats, we can use DB subordinate
     # Try to fetch preformatted record
     query = """SELECT value, needs_2nd_pass FROM bibfmt
                WHERE id_bibrec = %s AND format = %s"""
     params = (recID, of)
-    res = run_sql(query, params, run_on_slave=run_on_slave)
+    res = run_sql(query, params, run_on_subordinate=run_on_subordinate)
     if res:
         value = decompress(res[0][0])
         needs_2nd_pass = bool(res[0][1])
@@ -462,14 +462,14 @@ def get_preformatted_record_date(recID, of):
     @param of: the output format code
     @return: the date of the last update of the cache, or None if not exist
     """
-    # Decide whether to use DB slave:
+    # Decide whether to use DB subordinate:
     if of in ('xm', 'recstruct'):
-        run_on_slave = False # for master formats, use DB master
+        run_on_subordinate = False # for main formats, use DB main
     else:
-        run_on_slave = True # for other formats, we can use DB slave
+        run_on_subordinate = True # for other formats, we can use DB subordinate
     # Try to fetch preformatted record
     query = "SELECT last_updated FROM bibfmt WHERE id_bibrec='%s' AND format='%s'" % (recID, of)
-    res = run_sql(query, run_on_slave=run_on_slave)
+    res = run_sql(query, run_on_subordinate=run_on_subordinate)
     if res:
         # record 'recID' is formatted in 'of', so return it
         return "%s" % res[0][0]

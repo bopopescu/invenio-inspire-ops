@@ -53,7 +53,7 @@ def do_upgrade():
     """ Perform upgrade """
     tables = _get_tables()
     session_tbl = _get_table_info('session')
-    if (DB_VERSION == '1.0.0' or DB_VERSION == 'master') and \
+    if (DB_VERSION == '1.0.0' or DB_VERSION == 'main') and \
             'session_expiry' not in session_tbl['indexes']:
         _run_sql_ignore("ALTER TABLE session ADD KEY session_expiry " \
                         "(session_expiry)")
@@ -192,7 +192,7 @@ def do_upgrade():
           checksum char(32) NOT NULL,
           filesize bigint(15) unsigned NOT NULL,
           mime varchar(100) NOT NULL,
-          master_format varchar(50) NULL default NULL,
+          main_format varchar(50) NULL default NULL,
           PRIMARY KEY (id_bibdoc, version, format),
           KEY (last_version),
           KEY (format),
@@ -499,7 +499,7 @@ def pre_upgrade():
             "inveniocfg --upgrade can safely be ignored when upgrading from"
             " Invenio v0.99.1-0.99.x.")
 
-    if DB_VERSION == 'master':
+    if DB_VERSION == 'main':
         warnings.warn("Invenio database schema is on a development version"
             " between 1.0.x and 1.1.0")
 
@@ -560,7 +560,7 @@ def _invenio_schema_version_guesser():
     are identical.
 
     @return: One of the values pre-0.99.0, 0.99.0, 0.99.x, 0.99.x-1.0.0, 1.0.0,
-        1.0.2, master, unknown
+        1.0.2, main, unknown
     """
     tables = [x[0] for x in run_sql("SHOW TABLES;")]
 
@@ -643,7 +643,7 @@ def _invenio_schema_version_guesser():
         if 'session_expiry' in tblinfo['indexes']:
             invenio_version['1.0.2'] += 1
 
-    # '1.1.0/master' indicators
+    # '1.1.0/main' indicators
     if 'accMAILCOOKIE' in tables:
         tblinfo = _get_table_info('accMAILCOOKIE')
         if 'expiration' in tblinfo['indexes']:
@@ -678,7 +678,7 @@ def _invenio_schema_version_guesser():
             else:
                 return '1.0.2'
         else:
-            return 'master'
+            return 'main'
     return 'unknown'
 
 

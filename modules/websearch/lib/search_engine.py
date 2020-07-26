@@ -210,7 +210,7 @@ class RestrictedCollectionDataCacher(DataCacher):
             ret = []
             res = run_sql("""SELECT DISTINCT ar.value
                 FROM accROLE_accACTION_accARGUMENT raa JOIN accARGUMENT ar ON raa.id_accARGUMENT = ar.id
-                WHERE ar.keyword = 'collection' AND raa.id_accACTION = %s""", (VIEWRESTRCOLL_ID,), run_on_slave=True)
+                WHERE ar.keyword = 'collection' AND raa.id_accACTION = %s""", (VIEWRESTRCOLL_ID,), run_on_subordinate=True)
             for coll in res:
                 ret.append(coll[0])
             return ret

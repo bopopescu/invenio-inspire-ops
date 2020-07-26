@@ -614,21 +614,21 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link=True):
         "data_layer_class" : ("hepdata_data_%i" % (seq, )),
         "plots_layer_class" : ("hepdata_plots_%i" % (seq, )),
         "data_expander_id" : ("hepdata_expander_%i" % (seq, )),
-        "masterplot_layer_class" : ("hepdata_masterplot_layer_%i" % (seq,)),
-        "masterplot_expander_id" : ("hepdata_masterplot_expander_%i" % (seq,)),
+        "mainplot_layer_class" : ("hepdata_mainplot_layer_%i" % (seq,)),
+        "mainplot_expander_id" : ("hepdata_mainplot_expander_%i" % (seq,)),
         "plots_rowspan": len(dataset.data),
-        "masterplot_rowspan": len(dataset.data_qualifiers) + 3
+        "mainplot_rowspan": len(dataset.data_qualifiers) + 3
         }
 
-    args["collapse_message_masterplot"] = "&#8595;&#8595;&#8595;Hide&#8595;&#8595;&#8595;"
-    args["expand_message_masterplot"] = "&#8593;&#8593;&#8593;Plot&#8593;&#8593;&#8593;"
+    args["collapse_message_mainplot"] = "&#8595;&#8595;&#8595;Hide&#8595;&#8595;&#8595;"
+    args["expand_message_mainplot"] = "&#8593;&#8593;&#8593;Plot&#8593;&#8593;&#8593;"
 
-    args["onclick_code_masterplot_expand"] = "expandCollapseDataPlots(this.parentNode.parentNode.parentNode.parentNode, '%(masterplot_layer_class)s', '%(plots_layer_class)s', '%(data_layer_class)s', '%(masterplot_expander_id)s', '%(collapse_message_masterplot)s', '%(expand_message_masterplot)s');" % args
+    args["onclick_code_mainplot_expand"] = "expandCollapseDataPlots(this.parentNode.parentNode.parentNode.parentNode, '%(mainplot_layer_class)s', '%(plots_layer_class)s', '%(data_layer_class)s', '%(mainplot_expander_id)s', '%(collapse_message_mainplot)s', '%(expand_message_mainplot)s');" % args
 
     args["collapse_message_moredata"] = "&#8593;&#8593;&#8593;Collapse&#8593;&#8593;&#8593;"
     args["expand_message_moredata"] = "&#8595;&#8595;&#8595;Expand&#8595;&#8595;&#8595;"
 
-    args["onclick_code_moredata_expand"] = "return expandCollapseDataPlots(this.parentNode.parentNode.parentNode.parentNode, '%(data_layer_class)s','%(plots_layer_class)s', '%(masterplot_layer_class)s', '%(data_expander_id)s', '%(collapse_message_moredata)s', '%(expand_message_moredata)s');" % args
+    args["onclick_code_moredata_expand"] = "return expandCollapseDataPlots(this.parentNode.parentNode.parentNode.parentNode, '%(data_layer_class)s','%(plots_layer_class)s', '%(mainplot_layer_class)s', '%(data_expander_id)s', '%(collapse_message_moredata)s', '%(expand_message_moredata)s');" % args
 
 
     args["expander_colspan"] = dataset.num_columns + 2 # table_width + 2
@@ -673,13 +673,13 @@ def render_hepdata_dataset_html(dataset, recid, seq, display_link=True):
                 "colspan" : str(dataset.num_columns)
                 })
 
-            c.append("""<td rowspan="%(rowspan)i" class="expanderTableCell masterPlotExpanderTableCell">""" \
+            c.append("""<td rowspan="%(rowspan)i" class="expanderTableCell mainPlotExpanderTableCell">""" \
                          % {"rowspan" :  len(dataset.data_qualifiers) + 3})
             if multiplot_url:
-                c.append("""<p class="expander masterPlotExpander" onclick="%(onclick_code_masterplot_expand)s" id="%(masterplot_expander_id)s"><a>%(expand_message_masterplot)s</a></p>""" \
+                c.append("""<p class="expander mainPlotExpander" onclick="%(onclick_code_mainplot_expand)s" id="%(mainplot_expander_id)s"><a>%(expand_message_mainplot)s</a></p>""" \
                              % args)
             c.append("</td>")
-            c.append("<td class=\"masterplot_cell\" rowspan=\"%(masterplot_rowspan)s\"><div class=\"%(masterplot_layer_class)s\" style=\"display:none;\">" % args)
+            c.append("<td class=\"mainplot_cell\" rowspan=\"%(mainplot_rowspan)s\"><div class=\"%(mainplot_layer_class)s\" style=\"display:none;\">" % args)
             if multiplot_url:
                 c.append("<div><img src=\"%(multiplot_url)s\" alt=\"The plot is not available\" class=\"hepdataimg\"></img></div>" % args)
 

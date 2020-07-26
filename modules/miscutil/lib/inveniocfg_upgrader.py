@@ -41,7 +41,7 @@ Recommendations for writing upgrades
    "make check-upgrade" are being run). This means that an upgrade cannot
    assume anything about which version of Invenio is installed, and thus if
    the imported module is available or not.
- * Once an upgrade have been committed to master/maint, no fiddling is allowed
+ * Once an upgrade have been committed to main/maint, no fiddling is allowed
    afterwards. If you want to correct a mistake, make an new upgrade instead.
  * All upgrades must depend on a previous upgrade (except for your first
    upgrade).

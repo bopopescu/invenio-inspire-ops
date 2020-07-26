@@ -26,7 +26,7 @@ def info():
 
 def do_upgrade():
     """
-    Developers upgrading their existing master installations will likely be issued
+    Developers upgrading their existing main installations will likely be issued
     with many warnings from invenio_release_1_1_0 upgrade, due to being inbetween
     1.0 and 1.1 on the upgrade path. Most warnings can safely be ignored except for
     one related to aidUSERINPUTLOG. This upgrade implements an extra check of this

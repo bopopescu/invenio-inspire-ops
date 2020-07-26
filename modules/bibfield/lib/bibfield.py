@@ -57,19 +57,19 @@ CFG_BIBFIELD_READERS = PluginContainer(os.path.join(CFG_PYLIBDIR, 'invenio',
 # end Plug-in utils
 
 
-def create_record(blob, master_format='marc', verbose=0, **aditional_info):
+def create_record(blob, main_format='marc', verbose=0, **aditional_info):
     """
     Creates a record object from the blob description using the apropiate reader
     for it.
 
     @return Record object
     """
-    blob_wrapper = BlobWrapper(blob=blob, master_format=master_format, **aditional_info)
+    blob_wrapper = BlobWrapper(blob=blob, main_format=main_format, **aditional_info)
 
-    return CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (master_format,)](blob_wrapper)
+    return CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (main_format,)](blob_wrapper)
 
 
-def create_records(blob, master_format='marc', verbose=0, **aditional_info):
+def create_records(blob, main_format='marc', verbose=0, **aditional_info):
     """
     Creates a list of records from the blod descriptions using the split_records
     function to divide then.
@@ -78,9 +78,9 @@ def create_records(blob, master_format='marc', verbose=0, **aditional_info):
 
     @return List of record objects initiated by the functions create_record()
     """
-    record_blods = CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (master_format,)].split_blob(blob)
+    record_blods = CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (main_format,)].split_blob(blob)
 
-    return [create_record(record_blob, master_format, verbose=verbose, **aditional_info) for record_blob in record_blods]
+    return [create_record(record_blob, main_format, verbose=verbose, **aditional_info) for record_blob in record_blods]
 
 
 def get_record(recid, reset_cache=False):
@@ -106,7 +106,7 @@ def get_record(recid, reset_cache=False):
     if not blob_wrapper:
         return None
     record = \
-        CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (blob_wrapper.master_format,)](blob_wrapper)
+        CFG_BIBFIELD_READERS['bibfield_%sreader.py' % (blob_wrapper.main_format,)](blob_wrapper)
 
     #Update bibfmt for future uses
     run_sql("REPLACE INTO bibfmt(id_bibrec, format, last_updated, value) VALUES (%s, 'recjson', NOW(), %s)",
@@ -119,16 +119,16 @@ def _build_wrapper(recid):
     #TODO: update to look inside mongoDB for the parameters and the blob
     # Now is just working for marc and recstruct
     try:
-        master_format = run_sql("SELECT master_format FROM bibrec WHERE id=%s", (recid,))[0][0]
+        main_format = run_sql("SELECT main_format FROM bibrec WHERE id=%s", (recid,))[0][0]
     except:
         return None
 
     schema = 'recstruct'
 
-    if master_format == 'marc':
+    if main_format == 'marc':
         from invenio.search_engine import get_record as se_get_record
         blob = se_get_record(recid)
     else:
         return None
 
-    return BlobWrapper(blob, master_format=master_format, schema=schema)
+    return BlobWrapper(blob, main_format=main_format, schema=schema)

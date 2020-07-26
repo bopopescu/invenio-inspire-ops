@@ -204,7 +204,7 @@ def _task_write_message(message):
 
 def clean_job_for_quality(batch_job_dict, fallback=True):
     """
-    Removes jobs from the batch description that are not suitable for the master
+    Removes jobs from the batch description that are not suitable for the main
     video's quality. It applies only for encoding jobs!
     @param batch_job_dict: the dict containing the batch description
     @type batch_job_dict: dict
@@ -344,7 +344,7 @@ def sanitise_batch_job(batch_job):
         else:
             raise Exception("Could not parse bitrate")
 
-    if not getval(batch_job, 'update_from_master'):
+    if not getval(batch_job, 'update_from_main'):
         if not getval(batch_job, 'input'):
             raise Exception("No input file in batch description")
 
@@ -354,11 +354,11 @@ def sanitise_batch_job(batch_job):
     if not getval(batch_job, 'jobs'):
         raise Exception("No job list in batch description")
 
-    if getval(batch_job, 'update_from_master'):
-        if (not getval(batch_job, 'bibdoc_master_comment') and
-            not getval(batch_job, 'bibdoc_master_description') and
-            not getval(batch_job, 'bibdoc_master_subformat')):
-            raise Exception("If update_from_master ist set, a comment or"
+    if getval(batch_job, 'update_from_main'):
+        if (not getval(batch_job, 'bibdoc_main_comment') and
+            not getval(batch_job, 'bibdoc_main_description') and
+            not getval(batch_job, 'bibdoc_main_subformat')):
+            raise Exception("If update_from_main ist set, a comment or"
                     " description or subformat for matching must be given")
 
     if getval(batch_job, 'marc_snippet'):
@@ -399,7 +399,7 @@ def process_batch_job(batch_job_file):
     # GENERAL #
     #---------#
 
-    _task_write_message("----------- Handling Master -----------")
+    _task_write_message("----------- Handling Main -----------")
 
     ## Check the validity of the batch file here
     batch_job = json_decode_file(batch_job_file)
@@ -417,9 +417,9 @@ def process_batch_job(batch_job_file):
     # UPDATE FROM MASTER #
     #--------------------#
 
-    ## We want to add new stuff to the video's record, using the master as input
-    if getval(batch_job, 'update_from_master'):
-        found_master = False
+    ## We want to add new stuff to the video's record, using the main as input
+    if getval(batch_job, 'update_from_main'):
+        found_main = False
         bibdocs = recdoc.list_bibdocs()
         for bibdoc in bibdocs:
             bibdocfiles = bibdoc.list_all_files()
@@ -427,13 +427,13 @@ def process_batch_job(batch_job_file):
                 comment = bibdocfile.get_comment()
                 description = bibdocfile.get_description()
                 subformat = bibdocfile.get_subformat()
-                m_comment = getval(batch_job, 'bibdoc_master_comment', comment)
-                m_description = getval(batch_job, 'bibdoc_master_description', description)
-                m_subformat = getval(batch_job, 'bibdoc_master_subformat', subformat)
+                m_comment = getval(batch_job, 'bibdoc_main_comment', comment)
+                m_description = getval(batch_job, 'bibdoc_main_description', description)
+                m_subformat = getval(batch_job, 'bibdoc_main_subformat', subformat)
                 if (comment == m_comment and
                     description == m_description and
                     subformat == m_subformat):
-                    found_master = True
+                    found_main = True
                     batch_job['input'] = bibdocfile.get_full_path()
                     ## Get the aspect of the from the record
                     try:
@@ -442,12 +442,12 @@ def process_batch_job(batch_job_file):
                     except IndexError:
                         pass
                     break
-            if found_master:
+            if found_main:
                 break
-        if not found_master:
-            _task_write_message("Video master for record %d not found"
+        if not found_main:
+            _task_write_message("Video main for record %d not found"
                           % batch_job['recid'])
-            task_update_progress("Video master for record %d not found"
+            task_update_progress("Video main for record %d not found"
                                  % batch_job['recid'])
             ## Maybe send an email?
             return 1
@@ -461,10 +461,10 @@ def process_batch_job(batch_job_file):
 
     ## Generate the docname from the input filename's name or given name
     bibdoc_video_docname, bibdoc_video_extension = decompose_file(batch_job['input'])[1:]
-    if not bibdoc_video_extension or getval(batch_job, 'bibdoc_master_extension'):
-        bibdoc_video_extension = getval(batch_job, 'bibdoc_master_extension')
-    if getval(batch_job, 'bibdoc_master_docname'):
-        bibdoc_video_docname = getval(batch_job, 'bibdoc_master_docname')
+    if not bibdoc_video_extension or getval(batch_job, 'bibdoc_main_extension'):
+        bibdoc_video_extension = getval(batch_job, 'bibdoc_main_extension')
+    if getval(batch_job, 'bibdoc_main_docname'):
+        bibdoc_video_docname = getval(batch_job, 'bibdoc_main_docname')
 
     write_message("Creating BibDoc for %s" % bibdoc_video_docname)
     ## If the bibdoc exists, receive it
@@ -480,28 +480,28 @@ def process_batch_job(batch_job_file):
     #--------#
     # MASTER #
     #--------#
-    if not getval(batch_job, 'update_from_master'):
-        if getval(batch_job, 'add_master'):
-            ## Generate the right name for the master
-            ## The master should be hidden first an then renamed
+    if not getval(batch_job, 'update_from_main'):
+        if getval(batch_job, 'add_main'):
+            ## Generate the right name for the main
+            ## The main should be hidden first an then renamed
             ## when it is really available
             ## !!! FIX !!!
-            _task_write_message("Adding %s master to the BibDoc"
+            _task_write_message("Adding %s main to the BibDoc"
                           % bibdoc_video_docname)
-            master_format = compose_format(
+            main_format = compose_format(
                                     bibdoc_video_extension,
-                                    getval(batch_job, 'bibdoc_master_subformat', 'master')
+                                    getval(batch_job, 'bibdoc_main_subformat', 'main')
                                     )
             ## If a file of the same format is there, something is wrong, remove it!
             ## it might be caused by a previous corrupted submission etc.
-            if bibdoc_video.format_already_exists_p(master_format):
-                bibdoc_video.delete_file(master_format, 1)
+            if bibdoc_video.format_already_exists_p(main_format):
+                bibdoc_video.delete_file(main_format, 1)
             bibdoc_video.add_file_new_format(
                     batch_job['input'],
                     version=1,
-                    description=getval(batch_job, 'bibdoc_master_description'),
-                    comment=getval(batch_job, 'bibdoc_master_comment'),
-                    docformat=master_format
+                    description=getval(batch_job, 'bibdoc_main_description'),
+                    comment=getval(batch_job, 'bibdoc_main_comment'),
+                    docformat=main_format
                     )
 
     #-----------#
@@ -516,9 +516,9 @@ def process_batch_job(batch_job_file):
         _task_write_message("----------- Job %s of %s -----------"
                            % (_BATCH_STEP, _BATCH_STEPS))
 
-        ## Try to substitute docname with master docname
+        ## Try to substitute docname with main docname
         if getval(job, 'bibdoc_docname'):
-            job['bibdoc_docname'] = Template(job['bibdoc_docname']).safe_substitute({'bibdoc_master_docname': bibdoc_video_docname})
+            job['bibdoc_docname'] = Template(job['bibdoc_docname']).safe_substitute({'bibdoc_main_docname': bibdoc_video_docname})
 
         #-------------#
         # TRANSCODING #
@@ -541,15 +541,15 @@ def process_batch_job(batch_job_file):
                 raise Exception("No container/extension defined")
             ## Get the docname and subformat
             bibdoc_video_subformat = getval(job, 'bibdoc_subformat')
-            bibdoc_slave_video_docname = getval(job, 'bibdoc_docname', bibdoc_video_docname)
+            bibdoc_subordinate_video_docname = getval(job, 'bibdoc_docname', bibdoc_video_docname)
             ## The subformat is incompatible with ffmpegs name convention
             ## We do the encoding without and rename it afterwards
             bibdoc_video_fullpath = compose_file(
                                                  bibdoc_video_directory,
-                                                 bibdoc_slave_video_docname,
+                                                 bibdoc_subordinate_video_docname,
                                                  bibdoc_video_extension
                                                  )
-            _task_write_message("Transcoding %s to %s;%s" % (bibdoc_slave_video_docname,
+            _task_write_message("Transcoding %s to %s;%s" % (bibdoc_subordinate_video_docname,
                                 bibdoc_video_extension,
                                 bibdoc_video_subformat))
             ## We encode now directly into the bibdocs directory
@@ -579,7 +579,7 @@ def process_batch_job(batch_job_file):
                 ## Rename it, adding the subformat
                 os.rename(bibdoc_video_fullpath,
                           compose_file(bibdoc_video_directory,
-                                       bibdoc_slave_video_docname,
+                                       bibdoc_subordinate_video_docname,
                                        bibdoc_video_extension,
                                        bibdoc_video_subformat,
                                        1)
@@ -651,7 +651,7 @@ def process_batch_job(batch_job_file):
                     fname = os.path.join(tmpdir, filename)
 
                     bibdoc_frame_format = compose_format(bibdoc_frame_extension, bibdoc_frame_subformat)
-                    ## Same as with the master, if the format allready exists,
+                    ## Same as with the main, if the format allready exists,
                     ## override it, because something went wrong before
                     if bibdoc_frame.format_already_exists_p(bibdoc_frame_format):
                         bibdoc_frame.delete_file(bibdoc_frame_format, 1)
@@ -696,8 +696,8 @@ def process_batch_job(batch_job_file):
     # ADD MASTER METADATA #
     #---------------------#
 
-    if getval(batch_job, 'add_master_metadata'):
-        _task_write_message("Adding master metadata")
+    if getval(batch_job, 'add_main_metadata'):
+        _task_write_message("Adding main metadata")
         pbcore = pbcore_metadata(input_file = getval(batch_job, 'input'),
                                  pbcoreIdentifier = batch_job['recid'],
                                  aspect_override = getval(batch_job, 'aspect'))

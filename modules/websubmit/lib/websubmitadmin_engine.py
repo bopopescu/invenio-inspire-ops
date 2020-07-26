@@ -517,7 +517,7 @@ def perform_request_organise_submission_page(doctype="",
                     user_msg.append("Submission-collection moved downwards")
 
         else:
-            ## cannot move the master (0) collection
+            ## cannot move the main (0) collection
             user_msg.append("Unable to move submission-collection downwards")
         (title, body) = _organise_submission_page_display_submission_tree(user_msg=user_msg)
     elif "" not in (movesbmcollectionup, sbmcolid):
@@ -557,7 +557,7 @@ def perform_request_organise_submission_page(doctype="",
                                                                                                     score_brother_above)
                     user_msg.append("Submission-collection moved upwards")
         else:
-            ## cannot move the master (0) collection
+            ## cannot move the main (0) collection
             user_msg.append("Unable to move submission-collection upwards")
         (title, body) = _organise_submission_page_display_submission_tree(user_msg=user_msg)
     elif "" not in (addsbmcollection, addtosbmcollection):

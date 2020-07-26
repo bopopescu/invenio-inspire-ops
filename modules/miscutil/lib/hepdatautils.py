@@ -645,7 +645,7 @@ class Dataset(object):
                                           for col_h in self.column_headers], [])),
                       {}) # start with {} as initial record
 
-    def generate_qualifiers(self, master_recid):
+    def generate_qualifiers(self, main_recid):
         """Generate fields describing data qualifiers of a current dataset
            Returns a record containing only fields with necessary qualifiers
         """
@@ -660,7 +660,7 @@ class Dataset(object):
                     log_msg = ("""Data qualifier "%(dq)s" does not contain""" +\
                                    """ colon. Record number: %(recid)s """) % {
                         "dq" : dq["content"],
-                        "recid" : str(master_recid)
+                        "recid" : str(main_recid)
                         }
                     hepdata_log("harvesting", log_msg)
                     dq_key = ""

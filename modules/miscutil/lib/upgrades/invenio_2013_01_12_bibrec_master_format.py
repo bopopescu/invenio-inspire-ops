@@ -23,12 +23,12 @@ from invenio.dbquery import run_sql
 depends_on = ['invenio_release_1_1_0']
 
 def info():
-    return "New bibrec.master_format column"
+    return "New bibrec.main_format column"
 
 def do_upgrade():
     create_statement = run_sql('SHOW CREATE TABLE bibrec')[0][1]
-    if '`master_format` varchar(16)' not in create_statement:
-        run_sql("ALTER TABLE bibrec ADD COLUMN master_format varchar(16) NOT NULL default 'marc'")
+    if '`main_format` varchar(16)' not in create_statement:
+        run_sql("ALTER TABLE bibrec ADD COLUMN main_format varchar(16) NOT NULL default 'marc'")
 
     try:
         import pyparsing

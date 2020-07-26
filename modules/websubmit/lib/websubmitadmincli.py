@@ -52,9 +52,9 @@ Eg: websubmitadmin --dump=DEMOART -m relations > DEMOART_db_dump.sql
 Diff submission with given dump:
 Eg: websubmitadmin --diff=DEMOART < DEMOART_db_dump.sql
 
-Diff between latest version in 'master' branch of your Git repo, with
+Diff between latest version in 'main' branch of your Git repo, with
 version in database:
-Eg: git show master:websubmit/DEMOART_db_dump.sql | ../websubmitadmin --diff=DEMOART  | less -S
+Eg: git show main:websubmit/DEMOART_db_dump.sql | ../websubmitadmin --diff=DEMOART  | less -S
 
 Diff between CVS version and submission in database, ignoring dates
 and ordering of submission fields on the page:

@@ -121,7 +121,7 @@ CFG_BIBENCODE_FFMPEG_RE_VIDEOINFO_VSTREAM = re.compile("^\s*Stream #(\d+.\d+)\(?
 CFG_BIBENCODE_FFMPEG_RE_VIDEOINFO_ASTREAM = re.compile("^\s*Stream #(\d+.\d+)\(?(\w+)?\)?: Audio: ([a-zA-Z0-9\(\) ]*), (\d+) Hz, ([a-zA-Z0-9 ]+), (\w+), (\d+) kb\/s$")
 
 ## FFMPEG command for setting metadata
-## This will create a copy of the master and write the metadata there
+## This will create a copy of the main and write the metadata there
 CFG_BIBENCODE_FFMPEG_METADATA_SET_COMMAND = "ffmpeg -y -i %s -acodec copy -vcodec copy %s"
 
 ## FFMPEG metadata argument template

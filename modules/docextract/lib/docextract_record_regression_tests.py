@@ -42,7 +42,7 @@ class BibRecordTest(XmlTest):
         self.records_cache = {}
         self.xml_cache = {}
         for recid in perform_request_search(p=""):
-            r = run_sql("SELECT master_format FROM bibrec WHERE id=%s", [recid])
+            r = run_sql("SELECT main_format FROM bibrec WHERE id=%s", [recid])
             self.assertTrue(r, msg="bibrec row for %s missing" % recid)
             if r[0][0] != 'marc':
                 continue

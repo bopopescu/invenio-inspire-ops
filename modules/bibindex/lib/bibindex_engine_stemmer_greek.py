@@ -133,7 +133,7 @@ class GreekStemmer(object):
     implementation by Panos Kyriakakis (http://www.salix.gr/greek_stemmer)
     which in turn is based on a JavaScript implementation by
     Georgios Ntais (http://people.dsv.su.se/~hercules/greek_stemmer.gr.html)
-    for his master thesis "Development of a Stemmer for the Greek Language"
+    for his main thesis "Development of a Stemmer for the Greek Language"
     (http://people.dsv.su.se/~hercules/papers/Ntais_greek_stemmer_thesis_final.pdf).
     """
 

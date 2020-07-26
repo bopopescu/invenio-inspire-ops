@@ -249,10 +249,10 @@ def acc_is_role(name_action, **arguments):
 
     # first check if an action exists with this name
     id_action = acc_get_action_id(name_action)
-    arole = run_sql("SELECT id_accROLE FROM accROLE_accACTION_accARGUMENT WHERE id_accACTION=%s AND argumentlistid <= 0 LIMIT 1", (id_action, ), 1, run_on_slave=True)
+    arole = run_sql("SELECT id_accROLE FROM accROLE_accACTION_accARGUMENT WHERE id_accACTION=%s AND argumentlistid <= 0 LIMIT 1", (id_action, ), 1, run_on_subordinate=True)
     if arole:
         return True
-    other_roles_to_check = run_sql("SELECT id_accROLE, keyword, value, argumentlistid FROM  accROLE_accACTION_accARGUMENT JOIN accARGUMENT ON id_accARGUMENT=id WHERE id_accACTION=%s AND argumentlistid > 0", (id_action, ), run_on_slave=True)
+    other_roles_to_check = run_sql("SELECT id_accROLE, keyword, value, argumentlistid FROM  accROLE_accACTION_accARGUMENT JOIN accARGUMENT ON id_accARGUMENT=id WHERE id_accACTION=%s AND argumentlistid > 0", (id_action, ), run_on_subordinate=True)
     other_roles_to_check_dict = {}
     for id_accROLE, keyword, value, argumentlistid in other_roles_to_check:
         try:
@@ -993,7 +993,7 @@ def acc_get_action_id(name_action):
 
     try:
         return run_sql("""SELECT id FROM accACTION WHERE name = %s""",
-        (name_action, ), run_on_slave=True)[0][0]
+        (name_action, ), run_on_subordinate=True)[0][0]
     except (ProgrammingError, IndexError):
         return 0
 
@@ -1099,7 +1099,7 @@ def acc_get_role_id(name_role):
     """get id of role, name given. """
     try:
         return run_sql("""SELECT id FROM accROLE WHERE name = %s""",
-        (name_role, ), run_on_slave=True)[0][0]
+        (name_role, ), run_on_subordinate=True)[0][0]
     except IndexError:
         return 0
 
@@ -1214,7 +1214,7 @@ def acc_is_user_in_role(user_info, id_role):
     if run_sql("""SELECT ur.id_accROLE
             FROM user_accROLE ur
             WHERE ur.id_user = %s AND ur.expiration >= NOW() AND
-            ur.id_accROLE = %s LIMIT 1""", (user_info['uid'], id_role), 1, run_on_slave=True):
+            ur.id_accROLE = %s LIMIT 1""", (user_info['uid'], id_role), 1, run_on_subordinate=True):
         return True
 
     return acc_firerole_check_user(user_info, load_role_definition(id_role))
@@ -1229,10 +1229,10 @@ def acc_get_user_roles_from_user_info(user_info):
         roles = intbitset(run_sql("""SELECT ur.id_accROLE
             FROM user_accROLE ur
             WHERE ur.id_user = %s AND ur.expiration >= NOW()
-            ORDER BY ur.id_accROLE""", (uid, ), run_on_slave=True))
+            ORDER BY ur.id_accROLE""", (uid, ), run_on_subordinate=True))
 
     potential_implicit_roles = run_sql("""SELECT id, firerole_def_ser FROM accROLE
-        WHERE firerole_def_ser IS NOT NULL""", run_on_slave=True)
+        WHERE firerole_def_ser IS NOT NULL""", run_on_subordinate=True)
 
     for role_id, firerole_def_ser in potential_implicit_roles:
         if role_id not in roles:
@@ -1247,7 +1247,7 @@ def acc_get_user_roles(id_user):
     explicit_roles = run_sql("""SELECT ur.id_accROLE
         FROM user_accROLE ur
         WHERE ur.id_user = %s AND ur.expiration >= NOW()
-        ORDER BY ur.id_accROLE""", (id_user, ), run_on_slave=True)
+        ORDER BY ur.id_accROLE""", (id_user, ), run_on_subordinate=True)
 
     return [id_role[0] for id_role in explicit_roles]
 
@@ -1294,7 +1294,7 @@ def acc_find_user_role_actions(user_info):
                    ur.id_accROLE = raa.id_accROLE AND
                    raa.id_accACTION = a.id AND
                    raa.id_accROLE = r.id """
-        res1 = run_sql(query, (uid, ), run_on_slave=True)
+        res1 = run_sql(query, (uid, ), run_on_subordinate=True)
 
     res2 = []
     for res in res1:
@@ -1307,7 +1307,7 @@ def acc_find_user_role_actions(user_info):
             WHERE raa.id_accACTION = a.id AND
             raa.id_accROLE = r.id """
 
-        res3 = run_sql(query, run_on_slave=True)
+        res3 = run_sql(query, run_on_subordinate=True)
         res4 = []
         for role_name, action_name, role_definition in res3:
             if acc_firerole_check_user(user_info,
@@ -1368,10 +1368,10 @@ def acc_find_possible_roles(name_action, always_add_superadmin=True, **arguments
     given arguments. roles is a list of role_id
     """
     id_action = acc_get_action_id(name_action)
-    roles = intbitset(run_sql("SELECT id_accROLE FROM accROLE_accACTION_accARGUMENT WHERE id_accACTION=%s AND argumentlistid <= 0", (id_action, ), run_on_slave=True))
+    roles = intbitset(run_sql("SELECT id_accROLE FROM accROLE_accACTION_accARGUMENT WHERE id_accACTION=%s AND argumentlistid <= 0", (id_action, ), run_on_subordinate=True))
     if always_add_superadmin:
         roles.add(CFG_SUPERADMINROLE_ID)
-    other_roles_to_check = run_sql("SELECT id_accROLE, keyword, value, argumentlistid FROM  accROLE_accACTION_accARGUMENT JOIN accARGUMENT ON id_accARGUMENT=id WHERE id_accACTION=%s AND argumentlistid > 0", (id_action, ), run_on_slave=True)
+    other_roles_to_check = run_sql("SELECT id_accROLE, keyword, value, argumentlistid FROM  accROLE_accACTION_accARGUMENT JOIN accARGUMENT ON id_accARGUMENT=id WHERE id_accACTION=%s AND argumentlistid > 0", (id_action, ), run_on_subordinate=True)
     other_roles_to_check_dict = {}
     for id_accROLE, keyword, value, argumentlistid in other_roles_to_check:
         if id_accROLE not in roles:

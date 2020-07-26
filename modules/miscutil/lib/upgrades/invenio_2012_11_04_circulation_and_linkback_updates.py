@@ -29,8 +29,8 @@ def info():
 def do_upgrade():
 
     ## Since Invenio Upgrader was committed to maint-1.1 and merged to
-    ## master in 8d7ed84, some of the tables that were different in
-    ## maint-1.1 and master at the time needed upgrade recipe.  This
+    ## main in 8d7ed84, some of the tables that were different in
+    ## maint-1.1 and main at the time needed upgrade recipe.  This
     ## commit fixes the situation in gentle manner (by checking column
     ## existence etc), since some sites may have upgraded DB schema in
     ## various times.

@@ -114,7 +114,7 @@ class BibFieldMarcReaderMarcXML(unittest.TestCase):
                 </datafield>
             </record>
         """
-        blob = BlobWrapper(blob=xml, master_format='marc', schema='xml')
+        blob = BlobWrapper(blob=xml, main_format='marc', schema='xml')
         r = MarcReader(blob)
 
         self.assertTrue(r.rec_tree)
@@ -445,11 +445,11 @@ class BibFieldMarcReaderMarcXML(unittest.TestCase):
                 </datafield>
             </record>
         """
-        blob = BlobWrapper(blob=xml, master_format='marc', schema="xml")
+        blob = BlobWrapper(blob=xml, main_format='marc', schema="xml")
         r = MarcReader(blob)
 
         self.assertTrue(r.rec_json)
-        self.assertTrue(r['__master_format'] == 'marc')
+        self.assertTrue(r['__main_format'] == 'marc')
         self.assertTrue('authors' in r)
         self.assertTrue(r['authors[0].full_name'] == "Efstathiou, G P")
         self.assertTrue(len(r['authors']) == 5)
@@ -514,7 +514,7 @@ class BibFieldMarcReaderMarcXML(unittest.TestCase):
         fd, name = tempfile.mkstemp(suffix='.xml', dir=CFG_TMPDIR)
         os.write(fd, xml)
         os.close(fd)
-        blob = BlobWrapper(blob='', master_format='marc', schema='file:xml', blob_file_name=name)
+        blob = BlobWrapper(blob='', main_format='marc', schema='file:xml', blob_file_name=name)
         r = MarcReader(blob)
 
         self.assertTrue(r.rec_json)
@@ -531,7 +531,7 @@ class BibFieldMarcReaderRecstruct(unittest.TestCase):
         """docstring for test_rectruct_to_cool_struct_preparation"""
         from invenio.search_engine import get_record as search_engine_get_record
         bibrecord = search_engine_get_record(13)
-        blob = BlobWrapper(blob=bibrecord, master_format='marc', schema='recstruct')
+        blob = BlobWrapper(blob=bibrecord, main_format='marc', schema='recstruct')
         r = MarcReader(blob)
 
         self.assertTrue(r.rec_tree)
@@ -542,11 +542,11 @@ class BibFieldMarcReaderRecstruct(unittest.TestCase):
         """docstring for test_recjson_creation_from_recstruc"""
         from invenio.search_engine import get_record as search_engine_get_record
         bibrecord = search_engine_get_record(7)
-        blob = BlobWrapper(blob=bibrecord, master_format='marc', schema='recstruct')
+        blob = BlobWrapper(blob=bibrecord, main_format='marc', schema='recstruct')
         r = MarcReader(blob)
 
         self.assertTrue(r.rec_json)
-        self.assertTrue(r['__master_format'] == 'marc')
+        self.assertTrue(r['__main_format'] == 'marc')
         self.assertTrue('title' in r)
         self.assertTrue(r['title.title'] == 'Tim Berners-Lee')
         self.assertTrue('collection.primary' in r)

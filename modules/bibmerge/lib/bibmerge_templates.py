@@ -117,10 +117,10 @@ class Template:
       <td>Merge non-conflicting</td>
       </tr>
       <tr>
-      <td colspan="2"> <a id="bibMergeLinkToBibEdit1" href="#" title="Record editor for master record">Edit master record</a> </td>
+      <td colspan="2"> <a id="bibMergeLinkToBibEdit1" href="#" title="Record editor for main record">Edit main record</a> </td>
       </tr>
       <tr>
-      <td colspan="2"> <a id="bibMergeLinkToBibEdit2" href="#" title="Record editor for slave record">Edit slave record</a> </td>
+      <td colspan="2"> <a id="bibMergeLinkToBibEdit2" href="#" title="Record editor for subordinate record">Edit subordinate record</a> </td>
       </tr>
     </table>
   </div>
@@ -144,7 +144,7 @@ class Template:
       <tr>
       <td> <button type="button" id="bibMergeBtnSubmit">Submit</button> </td>
       <td> <input type="checkbox" id="bibMergeDupeCheckbox"></input> </td>
-      <td>delete slave record as duplicate</td>
+      <td>delete subordinate record as duplicate</td>
       </tr>
     </table>
   </div>

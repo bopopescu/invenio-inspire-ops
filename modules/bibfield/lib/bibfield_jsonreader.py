@@ -65,9 +65,9 @@ class JsonReader(BibFieldDict):
 
         if self.blob_wrapper:
             try:
-                self['__master_format'] = self.blob_wrapper.master_format
+                self['__main_format'] = self.blob_wrapper.main_format
             except AttributeError:
-                pass  # We are retrieving the cached version from the data base containing __master_format
+                pass  # We are retrieving the cached version from the data base containing __main_format
 
             self._prepare_blob()
             self._translate()
@@ -75,7 +75,7 @@ class JsonReader(BibFieldDict):
             self.check_record()
             self.is_init_phase = False
         else:
-            self['__master_format'] = 'json'
+            self['__main_format'] = 'json'
 
     @staticmethod
     def split_blob(blob):
@@ -95,11 +95,11 @@ class JsonReader(BibFieldDict):
     def is_empty(self):
         """
         One record is empty if there is nothing stored inside rec_json or there is
-        only '__master_format'
+        only '__main_format'
         """
         if not self.rec_json:
             return True
-        if self.keys() == ['__master_format']:
+        if self.keys() == ['__main_format']:
             return True
         if all(key.startswith('_') for key in self.keys()):
             return True
@@ -114,7 +114,7 @@ class JsonReader(BibFieldDict):
         def check_rules(checker_functions, key):
             """docstring for check_rule"""
             for checker_function in checker_functions:
-                if 'all' in checker_function[0] or self['__master_format'] in checker_function[0]:
+                if 'all' in checker_function[0] or self['__main_format'] in checker_function[0]:
                     try:
                         self._try_to_eval("%s(self,'%s',%s)" % (checker_function[1], key, checker_function[2]))
                     except BibFieldCheckerException, err:
@@ -269,7 +269,7 @@ class JsonReader(BibFieldDict):
 
         if rule_def['type'] == 'real':
             try:
-                rules = rule_def['rules'][self['__master_format']]
+                rules = rule_def['rules'][self['__main_format']]
             except KeyError:
                 return False
             return all(self._apply_rule(field_name, rule_def['aliases'], rule) for rule in rules)
